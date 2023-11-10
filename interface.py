@@ -2,7 +2,9 @@ from PyQt6.QtWidgets import QWidget, QApplication, QMainWindow, QGridLayout, QLa
 from PyQt6.QtCore import QSize, QPoint, QPropertyAnimation, QEasingCurve, Qt, QRunnable, QThreadPool, pyqtSlot, QObject, pyqtSignal
 from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtGui import QFont
-from backtracking import get_path
+from Backtracking import get_path
+from Warnsdorff import warnsdorff_path
+import ctypes
 
 class SolverSignals(QObject):
     finished = pyqtSignal(list)
@@ -16,7 +18,8 @@ class Solver(QRunnable):
 
     @pyqtSlot()
     def run(self):
-        path = get_path(m, n)
+        # path = get_path(m, n)
+        path = warnsdorff_path(m, n)
         self.signals.finished.emit(path)
 
 class Chessboard(QMainWindow):
@@ -32,7 +35,10 @@ class Chessboard(QMainWindow):
         self.visited_color = visited_color
         self.setWindowTitle(f"Chessboard ({rows}x{cols})")
         self.setFixedSize(QSize(cols*self.square_side, rows*self.square_side))
-
+        qr = self.frameGeometry()
+        cp = self.screen().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
         self.grid = QGridLayout()
         self.grid.setContentsMargins(0, 0, 0, 0)
         self.grid.setSpacing(0)
@@ -71,11 +77,11 @@ class Chessboard(QMainWindow):
     def show_label(self, text, darken=False):
         if darken:
             self.label_widget = QWidget(self)
-            self.label_widget.setFixedSize(QSize(self.m*self.square_side, self.n*self.square_side))
+            self.label_widget.setFixedSize(QSize(self.n*self.square_side, self.m*self.square_side))
             self.label_widget.setStyleSheet("background-color: rgba(0, 0, 0, 0.2);")
             self.label_widget.show()
         label = QLabel(self)
-        label.setFixedSize(QSize(self.m*self.square_side, self.n*self.square_side))
+        label.setFixedSize(QSize(self.n*self.square_side, self.m*self.square_side))
         label.setText(text)
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         if darken:
@@ -116,6 +122,8 @@ class Chessboard(QMainWindow):
     
     def show_path(self, path):
         self.path = path[1:]
+        if len(self.path) == self.m * self.n - 1:
+            self.visited_color = 'rgba(2, 201, 81, 0.4)'
         self.label.deleteLater()
         self.progress = 0
         if self.path:
@@ -126,13 +134,20 @@ class Chessboard(QMainWindow):
 
 app = QApplication([])
 
-m, n = 8, 8
+m, n = 30, 30
 SQUARE_SIZE = 75
 MOVE_DURATION = 300
 BOARD_COLORS = ['#ffd599','#b16e41']
 VISITED_COLOR = 'rgba(255, 0, 0, 0.4)'
 
-board = Chessboard(m, n, square_side=SQUARE_SIZE, animation_length=MOVE_DURATION, board_colors=BOARD_COLORS, visited_color = VISITED_COLOR)
+user32 = ctypes.windll.user32
+screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+while SQUARE_SIZE * n >= screensize[1] - 300:
+    SQUARE_SIZE -= 1
+while SQUARE_SIZE * m >= screensize[0] - 300:
+    SQUARE_SIZE -= 1
+
+board = Chessboard(n, m, square_side=SQUARE_SIZE, animation_length=MOVE_DURATION, board_colors=BOARD_COLORS, visited_color=VISITED_COLOR)
 board.move_knight(0, 0)
 board.show()
 app.exec()
