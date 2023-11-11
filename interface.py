@@ -4,6 +4,7 @@ from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtGui import QFont
 from Backtracking import get_path
 from Warnsdorff import warnsdorff_path
+from DnC import divide_and_conquer
 import ctypes
 
 class SolverSignals(QObject):
@@ -19,7 +20,9 @@ class Solver(QRunnable):
     @pyqtSlot()
     def run(self):
         # path = get_path(m, n)
-        path = warnsdorff_path(m, n)
+        # path = warnsdorff_path(m, n)
+        path = divide_and_conquer(n)
+        # print(path)
         self.signals.finished.emit(path)
 
 class Chessboard(QMainWindow):
@@ -102,6 +105,7 @@ class Chessboard(QMainWindow):
             self.show_label("Done")
             return
         cell = self.path[self.progress]
+        # print(cell)
         self.progress += 1
         self.move_knight(cell[0], cell[1], self.advance)
     
@@ -122,7 +126,7 @@ class Chessboard(QMainWindow):
     
     def show_path(self, path):
         self.path = path[1:]
-        if len(self.path) == self.m * self.n - 1:
+        if len(set(self.path)) == self.m * self.n - 1 and len(self.path) == self.m * self.n - 1:
             self.visited_color = 'rgba(2, 201, 81, 0.4)'
         self.label.deleteLater()
         self.progress = 0
@@ -133,18 +137,17 @@ class Chessboard(QMainWindow):
 
 
 app = QApplication([])
-
-m, n = 30, 30
+m, n = 79, 79
 SQUARE_SIZE = 75
-MOVE_DURATION = 300
+MOVE_DURATION = 8
 BOARD_COLORS = ['#ffd599','#b16e41']
 VISITED_COLOR = 'rgba(255, 0, 0, 0.4)'
 
 user32 = ctypes.windll.user32
 screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
-while SQUARE_SIZE * n >= screensize[1] - 300:
+while SQUARE_SIZE * n >= screensize[1] - 300 and SQUARE_SIZE >= 5:
     SQUARE_SIZE -= 1
-while SQUARE_SIZE * m >= screensize[0] - 300:
+while SQUARE_SIZE * m >= screensize[0] - 300 and SQUARE_SIZE >= 5:
     SQUARE_SIZE -= 1
 
 board = Chessboard(n, m, square_side=SQUARE_SIZE, animation_length=MOVE_DURATION, board_colors=BOARD_COLORS, visited_color=VISITED_COLOR)
