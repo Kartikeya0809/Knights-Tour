@@ -41,7 +41,7 @@ def solve(x, y, path):
 
 def get_path(x, y):
     global n, m, visited, paths
-    n = x; m = y
+    n = y; m = x
     visited = [[0 for i in range(0, m)] for j in range(0, n)]
     visited[0][0] = 1
     if not solve(0, 0, [(0, 0)]):
