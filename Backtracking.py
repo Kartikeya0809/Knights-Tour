@@ -32,11 +32,12 @@ def get_path(x, y):
     m = y
     visited = [[0 for i in range(0, y)] for j in range(0, x)]
     visited[0][0] = 1
+    print("Solving")
     if not solve(0, 0, [(0, 0)]):
         print("No Solution")
+    print("Returning")
     return paths
 
 # board = Tk()
 # board.geometry("700x550")
 # board.title("Knight's Tour")
-

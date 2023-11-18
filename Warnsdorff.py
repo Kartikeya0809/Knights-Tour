@@ -39,7 +39,7 @@ def solve(x, y, path):
         paths = path.copy()
     return False
 
-def warnsdorff_path(x, y):
+def get_path(x, y):
     global n, m, visited, paths
     n = x; m = y
     visited = [[0 for i in range(0, m)] for j in range(0, n)]

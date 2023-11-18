@@ -2,9 +2,11 @@ from PyQt6.QtWidgets import QWidget, QApplication, QMainWindow, QGridLayout, QLa
 from PyQt6.QtCore import QSize, QPoint, QPropertyAnimation, QEasingCurve, Qt, QRunnable, QThreadPool, pyqtSlot, QObject, pyqtSignal
 from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtGui import QFont, QPainter, QColor
-from Backtracking import get_path
-from Warnsdorff import warnsdorff_path
-from DnC import divide_and_conquer
+import importlib
+# from Backtracking import get_path
+# from Warnsdorff import get_
+# from DnC import divide_and_conquer
+import sys
 import ctypes
 
 class SolverSignals(QObject):
@@ -19,9 +21,10 @@ class Solver(QRunnable):
 
     @pyqtSlot()
     def run(self):
+        path = get_path(m, n)
         # path = get_path(m, n)
         # path = warnsdorff_path(m, n)
-        path = divide_and_conquer(n)
+        # path = divide_and_conquer(n)
         # print(path)
         self.signals.finished.emit(path)
 
@@ -177,11 +180,17 @@ class Chessboard(QMainWindow):
         else:
             self.show_label("No solution", darken=True)
 
+args = sys.argv
+if len(args) != 4:
+    print(f"Usage: {args[0]} <rows> <cols> <algorithm_module>")
+    exit(1)
+
+get_path = importlib.import_module(args[3]).get_path
 
 app = QApplication([])
-m, n = 23, 23
+m, n = int(args[1]), int(args[2])
 SQUARE_SIZE = 75
-MOVE_DURATION = 10
+MOVE_DURATION = 1
 BOARD_COLORS = ['#ffd599','#b16e41']
 VISITED_COLOR = 'rgba(255, 0, 0, 0.4)'
 LINE_COLOR = 'rgb(0, 0, 0)'
