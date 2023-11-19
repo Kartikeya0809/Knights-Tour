@@ -26,7 +26,7 @@ def solve(x, y, path):
         paths = path.copy()
     return False
 
-def get_path(x, y):
+def get_path(y, x):
     global paths, visited, n, m
     n = x
     m = y
