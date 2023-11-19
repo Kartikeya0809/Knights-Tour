@@ -1,5 +1,5 @@
 import math
-import warnsdorff
+import Warnsdorff
 
 def test(k):
     s = "27 42 37 30 21 14 19 6 1 36 31 28 43 38 7 2 13 18 41 26 33 22 29 20 15 10 5 32 35 24 39 44 3 8 17 12 25 40 45 34 23 16 11 4 9" # 46 63 50 57 54 51 58 55 62 49 64 47 60 53 56 59 52 65 48 61
@@ -63,7 +63,7 @@ def get_path(m, n):
 m = 0
 def solve1(n, t, x=0, y=0, it=0):
     if n <= 9:
-        return warnsdorff.get_path(n, n)
+        return Warnsdorff.get_path(n, n)
     if it%2 == 0:
         path = []
         for i in range(0, n // 5 - 1):
@@ -105,7 +105,7 @@ def solve1(n, t, x=0, y=0, it=0):
 
 def solve2(n, x=0, y=0, it=0):
     if n <= 9:
-        return warnsdorff_path(n, n)
+        return Warnsdorff.get_path(n, n)
     if it % 2 == 0:
         path = []
         for i in range(0, n // 5 - 1):

@@ -222,12 +222,12 @@ class Chessboard(QMainWindow):
 class Picker(QMainWindow):
     ALGORITHMS = {
         "Backtracking": {
-            "module": "backtracking",
+            "module": "Backtracking",
         },
         "Warnsdorff": {
-            "module": "warnsdorff",
+            "module": "Warnsdorff",
         },
-        "Divide and conquer": {"module": "dnc", "fix": {"Columns": "Rows"}},
+        "Divide and conquer": {"module": "DnC", "fix": {"Columns": "Rows"}},
     }
 
     def __init__(self, callback, *args, **kwargs):
@@ -327,7 +327,7 @@ class Picker(QMainWindow):
 
 
 SQUARE_SIZE = 75
-MOVE_DURATION = 1
+MOVE_DURATION = 100
 BOARD_COLORS = ["#ffd599", "#b16e41"]
 VISITED_COLOR = "rgba(255, 0, 0, 0.4)"
 LINE_COLOR = "rgb(0, 0, 0)"
