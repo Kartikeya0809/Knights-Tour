@@ -2,7 +2,6 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 from PyQt6.QtSvgWidgets import *
 from PyQt6.QtGui import *
-import importlib
 
 import sys
 
@@ -10,15 +9,17 @@ class SolverSignals(QObject):
     finished = pyqtSignal(list)
 
 class Solver(QRunnable):
-    def __init__(self, m, n):
+    def __init__(self, m, n, module):
         super().__init__()
         self.m = m
         self.n = n
+        self.module = module
         self.signals = SolverSignals()
 
     @pyqtSlot()
     def run(self):
-        path = get_path(self.m, self.n)
+        import importlib
+        path = importlib.import_module(self.module).get_path(self.m, self.n)
         self.signals.finished.emit(path)
 
 
@@ -65,10 +66,11 @@ class Chessboard(QMainWindow):
         square_side,
         animation_length,
         board_colors,
-        visited_color,
+        visited_colors,
         line_color,
         line_opacity,
         previous,
+        module
     ):
         super().__init__()
         if previous:
@@ -80,9 +82,10 @@ class Chessboard(QMainWindow):
         self.square_side = square_side
         self.animation_length = animation_length
         self.board_colors = board_colors
-        self.visited_color = visited_color
+        self.visited_colors = visited_colors
         self.line_color = line_color
         self.line_opacity = line_opacity
+        self.module = module
         self.setWindowTitle(f"Chessboard ({rows}x{cols})")
         self.setFixedSize(QSize(cols * self.square_side, rows * self.square_side))
         self.progress = 0
@@ -93,6 +96,7 @@ class Chessboard(QMainWindow):
         self.grid = QGridLayout()
         self.grid.setContentsMargins(0, 0, 0, 0)
         self.grid.setSpacing(0)
+        self.squares = {row: dict() for row in range(rows)}
         for i in range(rows):
             for j in range(cols):
                 square = QWidget()
@@ -101,6 +105,7 @@ class Chessboard(QMainWindow):
                     "background-color: " + self.board_colors[(i + j) % 2]
                 )
                 self.grid.addWidget(square, i + 1, j + 1)
+                self.squares[j][i] = square
 
         board = QWidget()
         board.setLayout(self.grid)
@@ -162,22 +167,25 @@ class Chessboard(QMainWindow):
         self.move_knight(cell[0], cell[1], self.advance)
 
     def mark_visited(self, i, j):
-        marker = QWidget(self)
-        marker.setStyleSheet(f"background-color: {self.visited_color};")
-        marker.setGeometry(
-            i * self.square_side,
-            j * self.square_side,
-            self.square_side,
-            self.square_side,
-        )
-        marker.updateGeometry()
-        marker.show()
-        marker.update()
+        self.squares[i][j].setStyleSheet(f"background-color: {self.visited_colors[(i+j)%2]}")
+        self.squares[i][j].update()
+        # marker = QWidget(self)
+        # marker.setStyleSheet(f"background-color: {self.visited_colors};")
+        # marker.setGeometry(
+        #     i * self.square_side,
+        #     j * self.square_side,
+        #     self.square_side,
+        #     self.square_side,
+        # )
+        # marker.updateGeometry()
+        # marker.show()
+        # marker.update()
 
     def showEvent(self, event):
+        global module
         super().showEvent(event)
         self.show_label("Finding path...", darken=True)
-        solver = Solver(self.m, self.n)
+        solver = Solver(self.m, self.n, self.module)
         solver.signals.finished.connect(self.show_path)
         self.threadpool.start(solver)
     
@@ -190,7 +198,9 @@ class Chessboard(QMainWindow):
             len(set(self.path)) == self.m * self.n - 1
             and len(self.path) == self.m * self.n - 1
         ):
-            self.visited_color = "rgba(2, 201, 81, 0.4)"
+            self.visited_colors = ["#9ad07c", "#6b9247"]
+        else:
+            self.visited_colors = ["#ff805c", "d04227"]
         self.destroy_label()
         self.progress = 0
         if self.path:
@@ -327,9 +337,10 @@ class Picker(QMainWindow):
 
 
 SQUARE_SIZE = 75
-MOVE_DURATION = 100
+MOVE_DURATION = 1
 BOARD_COLORS = ["#ffd599", "#b16e41"]
-VISITED_COLOR = "rgba(255, 0, 0, 0.4)"
+VISITED_COLORS = ["#9ad07c", "#6b9247"]
+# VISITED_COLOR = "rgba(255, 0, 0, 0.4)"
 LINE_COLOR = "rgb(0, 0, 0)"
 LINE_OPACITY = 0.3
 
@@ -341,7 +352,7 @@ def create_board(m, n, module, previous=None):
     global board
     global SQUARE_SIZE, MOVE_DURATION, BOARD_COLORS, VISITED_COLOR, LINE_COLOR, LINE_OPACITY
     global get_path
-    get_path = importlib.import_module(module).get_path
+    # get_path = importlib.import_module(module).get_path
     screensize = QApplication.instance().primaryScreen().availableGeometry()
     screensize = (screensize.width(), screensize.height())
     while SQUARE_SIZE * n >= screensize[1] - 300 and SQUARE_SIZE >= 5:
@@ -355,10 +366,11 @@ def create_board(m, n, module, previous=None):
         square_side=SQUARE_SIZE,
         animation_length=MOVE_DURATION,
         board_colors=BOARD_COLORS,
-        visited_color=VISITED_COLOR,
+        visited_colors=VISITED_COLORS,
         line_color=LINE_COLOR,
         line_opacity=LINE_OPACITY,
         previous=previous,
+        module=module
     )
     board.setWindowIcon(QIcon("images/ndt.svg"))
     board.setWindowTitle("Knight's tour | Solver")
