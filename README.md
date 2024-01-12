@@ -1,6 +1,9 @@
 # DM_Project
 Discrete Mathematics Group Project ( Monsoon Semester 2023 )
 
+Presentation Link: https://www.canva.com/design/DAFzji3TqdM/tNcCbVhqX3qb-ID9jUdKOg/edit?utm_content=DAFzji3TqdM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
+
 ## Install the required packages
 ```
 pip install -r requirements.txt
