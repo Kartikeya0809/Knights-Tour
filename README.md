@@ -1,4 +1,4 @@
-# DM_Project
+# Knights Tour
 Discrete Mathematics Group Project ( Monsoon Semester 2023 )
 
 Presentation Link: https://www.canva.com/design/DAFzji3TqdM/it26F3MugBSxjb5jn53gpw/view?utm_content=DAFzji3TqdM&utm_campaign=designshare&utm_medium=link&utm_source=editor
